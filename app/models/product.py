@@ -13,4 +13,4 @@ class Product(base):
     owner_id = Column(Integer, ForeignKey("users.id"))  
     created_at = Column(DateTime, default=datetime.utcnow)
 
-    owner = relationship("User", back_populates="Product")
+    owner = relationship("User", back_populates=" products")
