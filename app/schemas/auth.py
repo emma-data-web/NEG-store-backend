@@ -3,7 +3,7 @@ from pydantic import BaseModel, EmailStr
 class UserCreate(BaseModel):
   first_name : str
   last_name : str
-  useranme : str
+  username : str
   email : EmailStr
   password : str
 
@@ -23,5 +23,5 @@ class UserLogin(BaseModel):
 
 
 class UserLoginResponse(BaseModel):
-  id : int
-  first_name: str
+  access_token: str
+  token_type: str = "bearer"
