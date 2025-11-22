@@ -1,6 +1,7 @@
-from sqlalchemy import Column, Integer, String, ForeignKey, Numeric
+from sqlalchemy import Column, Integer, String, ForeignKey, Numeric, DateTime
 from sqlalchemy.orm import relationship
 from app.database.base import base
+from datetime import datetime
 
 class Product(base):
     __tablename__ = "products"
@@ -10,5 +11,6 @@ class Product(base):
     price = Column(Numeric(10, 2), nullable=False)
     description = Column(String)
     owner_id = Column(Integer, ForeignKey("users.id"))  
+    created_at = Column(DateTime, default=datetime.utcnow)
 
-    owner = relationship("User", back_populates="products")
+    owner = relationship("User", back_populates="Product")
