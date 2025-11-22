@@ -11,3 +11,20 @@ def create_user(user:UserCreate, db:Session):
 
   if existing_user:
     raise HTTPException(status_code=400, detail='User already exist')
+  
+  harsed_pwd = hash_password(user.password)
+
+  new_user = User(
+    first_name = user.first_name,
+    last_name = user.last_name,
+    username = user.username,
+    email = user.email,
+    hashed_password = harsed_pwd
+  )
+
+  db.add(new_user)
+  db.commit()
+
+  return new_user
+
+
