@@ -9,6 +9,6 @@ class Settings(BaseSettings):
   EMAIL_PASSWORD: str
 
   class config:
-     env_file = ".env"
+     env_file = "dev.env"
 
 Settings = Settings()

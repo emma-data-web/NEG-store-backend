@@ -1,8 +1,7 @@
-from app.core.config import Settings
 from app.core.security import hash_password,verify_password, create_access_token, decode_access_token
-from app.schemas.auth import UserCreate, UserCreateResponse, UserLogin, UserLoginResponse
+from app.schemas.auth import UserCreate, UserLogin
 from sqlalchemy.orm import Session
-from fastapi import HTTPException, status
+from fastapi import HTTPException
 from app.models.user import User
 
 
@@ -32,4 +31,6 @@ def create_user(user:UserCreate, db:Session):
 def login(user: UserLogin, db: Session):
   db_user = db.query(User).filter(User.email == user.email).first()
   if not db_user or verify_password(user.password, db_user.hashed_password):
-    raise HTTPException(status_code=401, detail='invalid username or passwors')
+    raise HTTPException(status_code=401, detail='invalid username or password')
+  access_token = create_access_token({"sub": str(db_user.id)})
+  return {"access_token": access_token, "token_type": "bearer"}
