@@ -28,3 +28,8 @@ def create_user(user:UserCreate, db:Session):
   return new_user
 
 
+
+def login(user: UserLogin, db: Session):
+  db_user = db.query(User).filter(User.email == user.email).first()
+  if not db_user or verify_password(user.password, db_user.hashed_password):
+    raise HTTPException(status_code=401, detail='invalid username or passwors')
