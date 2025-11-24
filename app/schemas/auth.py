@@ -25,3 +25,7 @@ class UserLogin(BaseModel):
 class UserLoginResponse(BaseModel):
   access_token: str
   token_type: str = "bearer"
+
+
+class Message(BaseModel):
+   message: str

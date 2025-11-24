@@ -3,6 +3,7 @@ from app.schemas.auth import UserCreate, UserLogin
 from sqlalchemy.orm import Session
 from fastapi import HTTPException, Query
 from app.models.user import User
+from app.core.email import send_verification_email
 
 
 def create_user(user:UserCreate, db:Session):
@@ -25,8 +26,10 @@ def create_user(user:UserCreate, db:Session):
 
   db.add(new_user)
   db.commit()
-
+  db.refresh(new_user)
  
+  verification_link = generate_verification_link(new_user)
+  send_verification_email(new_user.email, verification_link)
 
   return new_user
 
@@ -36,6 +39,11 @@ def login(user: UserLogin, db: Session):
   db_user = db.query(User).filter(User.email == user.email).first()
   if not db_user or not verify_password(user.password, db_user.hashed_password):
     raise HTTPException(status_code=401, detail='invalid username or password')
+  if not db_user.is_verified:
+        raise HTTPException(
+            status_code=403, 
+            detail='Account not verified. Please check your email for the verification link.'
+        )
   access_token = create_access_token({"sub": str(db_user.id)})
   return {"access_token": access_token, "token_type": "bearer"}
 
@@ -57,3 +65,5 @@ def verify_user_email(token: str, db: Session):
     db.commit()
 
     return user
+
+

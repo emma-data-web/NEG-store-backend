@@ -57,7 +57,7 @@ def decode_access_token(token: str):
             raise credentials_exception
         
         
-        return user_id 
+        return payload
         
     except JWTError:
         raise credentials_exception
