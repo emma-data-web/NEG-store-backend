@@ -13,7 +13,8 @@ class User(base):
   email = Column(String, unique=True, index=True)
   hashed_password = Column(String)
   is_active = Column(Boolean, default=True)
+  is_verified = Column(Boolean,default=False),
   created_at = Column(DateTime, default=datetime.utcnow)
 
 
-  products = relationship("product", back_populates="owner")
+  products = relationship("Product", back_populates="owner")

@@ -5,6 +5,7 @@ from app.database.base import base
 from app.routers.auth import auth_router
 
 
+
 base.metadata.create_all(bind=engine)
 
 app = FastAPI(

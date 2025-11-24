@@ -8,7 +8,7 @@ class Settings(BaseSettings):
   EMAIL_USER: str
   EMAIL_PASSWORD: str
 
-  class config:
+  class Config:
      env_file = "dev.env"
 
 Settings = Settings()
