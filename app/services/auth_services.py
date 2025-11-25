@@ -49,7 +49,7 @@ def login(user: UserLogin, db: Session):
 
 def generate_verification_link(user: User):
     token = create_access_token({"sub": str(user.id)})
-    link = f"http://localhost:8000/auth/verify-email?token={token}"
+    link = f"http://localhost:8000/api/v1/auth/verify-email?token={token}"
     return link
 
 

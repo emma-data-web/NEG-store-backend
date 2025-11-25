@@ -5,8 +5,8 @@ class Settings(BaseSettings):
   SECRET_KEY: str
   JWT_ALGORITHM: str
   ACESS_TOKEN_EXPIRE_MINUTE: int = 30
-  EMAIL_USER: str
-  EMAIL_PASSWORD: str
+  SENDER_EMAIL : str
+  SENDGRID_API_KEY: str
 
   class Config:
      env_file = "dev.env"
