@@ -1,9 +1,10 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, status
 from sqlalchemy.orm import Session
 from app.schemas.auth import Message
 from app.dependencies import get_db
-from app.schemas.auth import UserCreate, UserCreateResponse, UserLogin, UserLoginResponse
-from app.services.auth_services import create_user, login, generate_verification_link, verify_user_email
+from app.schemas.auth import UserCreate,  UserLogin, UserLoginResponse, ResetPassword, ForgotPassword
+from app.services.auth_services import create_user, login, verify_user_email, send_reset_link, reset_user_password
+
 
 
 auth_router = APIRouter()
@@ -25,3 +26,15 @@ def signin(user: UserLogin, db: Session = Depends(get_db)):
 def verify_email(token: str, db: Session= Depends(get_db)):
   user = verify_user_email(token, db)
   return {'message', f'email for {user.first_name} is successful'}
+
+
+@auth_router.post("/forgot-password", status_code=status.HTTP_200_OK)
+def request_password_reset(request: ForgotPassword, db: Session = Depends(get_db)):
+   
+    return send_reset_link(db=db, email=request.email)
+
+@auth_router.post("/reset-password", status_code=status.HTTP_200_OK)
+def reset_password_endpoint(data: ResetPassword, db: Session = Depends(get_db)):
+   
+    return reset_user_password(db=db, data=data)
+  

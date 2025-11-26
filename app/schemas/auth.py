@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, Field
 
 class UserCreate(BaseModel):
   first_name : str
@@ -29,3 +29,11 @@ class UserLoginResponse(BaseModel):
 
 class Message(BaseModel):
    message: str
+
+class ForgotPassword(BaseModel):
+  email: EmailStr
+  
+class ResetPassword(BaseModel):
+    """Schema for submitting a new password with the reset token."""
+    token: str
+    new_password: str = Field(min_length=8)

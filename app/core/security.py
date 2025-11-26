@@ -17,7 +17,6 @@ def verify_password(plain_password, hashed_password):
 
 
 
-
 def create_access_token(data: dict, expires_delta: timedelta | None = None):
     to_encode = data.copy()
     if expires_delta:
@@ -34,7 +33,6 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None):
         algorithm=Settings.JWT_ALGORITHM
     )
     return encoded_jwt
-
 
 
 
@@ -61,3 +59,43 @@ def decode_access_token(token: str):
         
     except JWTError:
         raise credentials_exception
+    
+
+
+
+def reset_password_access_token(data: dict, expires_delta: timedelta | None = None):
+    to_encode = data.copy()
+    if expires_delta:
+        expire = datetime.utcnow() + expires_delta
+    else:
+        
+        expire = datetime.utcnow() + timedelta(minutes=Settings.RESET_PASSWORD_TOKEN_EXPIRE_MINUTE)
+    
+    to_encode.update({"exp": expire})
+    
+    encoded_jwt = jwt.encode(
+        to_encode, 
+        Settings.SECRET_KEY, 
+        algorithm=Settings.JWT_ALGORITHM
+    )
+    return encoded_jwt
+
+
+def create_password_reset_token(user_id: int) -> str:
+  
+    to_encode = {"sub": str(user_id), "scope": "password_reset"}
+    
+    
+    expires_delta = timedelta(minutes=Settings.RESET_PASSWORD_TOKEN_EXPIRE_MINUTE)
+    
+    expire = datetime.utcnow() + expires_delta
+    to_encode.update({"exp": expire})
+    
+    encoded_jwt = jwt.encode(to_encode, Settings.SECRET_KEY, algorithm=Settings.JWT_ALGORITHM)
+    return encoded_jwt
+
+
+
+
+
+

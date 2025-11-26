@@ -7,6 +7,7 @@ class Settings(BaseSettings):
   ACESS_TOKEN_EXPIRE_MINUTE: int = 30
   SENDER_EMAIL : str
   SENDGRID_API_KEY: str
+  RESET_PASSWORD_TOKEN_EXPIRE_MINUTE: int =  5
 
   class Config:
      env_file = "dev.env"
