@@ -7,10 +7,14 @@ class Product(base):
     __tablename__ = "products"
 
     id = Column(Integer, primary_key=True, index=True)
-    name = Column(String, index=True)
+    name = Column(String, nullable=False, index=True)
     price = Column(Numeric(10, 2), nullable=False)
-    description = Column(String)
-    owner_id = Column(Integer, ForeignKey("users.id"))  
+    description = Column(String, nullable=False)
+    quantity = Column(Integer, default=0)
+    image_url = Column(String, nullable=True)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    owner_id = Column(Integer, ForeignKey("users.id")) 
+    category = Column(String, index=True) 
     created_at = Column(DateTime, default=datetime.utcnow)
 
     owner = relationship("User", back_populates="products")
