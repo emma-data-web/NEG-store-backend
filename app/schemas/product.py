@@ -32,3 +32,13 @@ class ProductResponse(ProductBase):
 
     class Config:
         orm_mode = True
+
+
+class GetProductResponse(ProductBase):
+    id: int
+    name: str
+    price: float
+    description: str
+
+    class Config:
+        orm_mode = True
