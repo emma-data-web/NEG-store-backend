@@ -13,8 +13,8 @@ class Product(base):
     quantity = Column(Integer, default=0)
     image_url = Column(String, nullable=True)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
-    owner_id = Column(Integer, ForeignKey("users.id")) 
+    store_id = Column(Integer, ForeignKey("users.id")) 
     category = Column(String, index=True) 
     created_at = Column(DateTime, default=datetime.utcnow)
 
-    owner = relationship("User", back_populates="products")
+    owner = relationship("Store", back_populates="owner")

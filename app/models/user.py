@@ -17,4 +17,4 @@ class User(base):
   created_at = Column(DateTime, default=datetime.utcnow)
 
 
-  products = relationship("Product", back_populates="owner")
+  store = relationship("Store", back_populates="owner")
