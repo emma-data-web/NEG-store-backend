@@ -1,26 +1,28 @@
 from pydantic import BaseModel
 from datetime import datetime
 
-
 class StoreBase(BaseModel):
-  id: int
-  name: str
-  description: str
-  phone_number: int
-  address: str
+    name: str
+    description: str
+    phone_number: str
+    address: str
 
 
-class Createstore(StoreBase):
-  created_at: datetime
+class CreateStore(StoreBase):
+    pass
 
 
-class StoreUpdate(StoreBase):
-  phone_number: int  | None = None
-  address: str | None = None
+class StoreUpdate(BaseModel):
+    name: str | None = None
+    description: str | None = None
+    phone_number: str | None = None
+    address: str | None = None
 
 
 class StoreResponse(StoreBase):
-  owner_id : int
+    id: int
+    owner_id: int
+    created_at: datetime
 
-  class Config:
-    orm_mode = True
+    class Config:
+        orm_mode = True

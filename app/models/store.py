@@ -15,3 +15,4 @@ class Store(base):
     created_at = Column(DateTime, default=datetime.utcnow)
 
     owner = relationship("User", back_populates="store")
+    products = relationship("Product", back_populates="store")

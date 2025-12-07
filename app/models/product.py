@@ -1,3 +1,4 @@
+
 from sqlalchemy import Column, Integer, String, ForeignKey, Numeric, DateTime
 from sqlalchemy.orm import relationship
 from app.database.base import base
@@ -13,8 +14,10 @@ class Product(base):
     quantity = Column(Integer, default=0)
     image_url = Column(String, nullable=True)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
-    store_id = Column(Integer, ForeignKey("users.id")) 
+    store_id = Column(Integer, ForeignKey("stores.id")) 
     category = Column(String, index=True) 
     created_at = Column(DateTime, default=datetime.utcnow)
 
-    owner = relationship("Store", back_populates="owner")
+    
+    store = relationship("Store", back_populates="products")
+
