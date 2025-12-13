@@ -1,11 +1,11 @@
 
 from pydantic import BaseModel
-from sqlalchemy import DECIMAL
+from decimal import Decimal
 from datetime import datetime
 
 class ProductBase(BaseModel):
     name: str
-    price: DECIMAL
+    price: Decimal
     description: str | None = None
     quantity: int | None = 0
     category: str | None = None
@@ -18,12 +18,11 @@ class ProductCreate(ProductBase):
 
 class ProductUpdate(BaseModel):
     name: str | None = None
-    price: DECIMAL | None = None
+    price: Decimal | None = None
     description: str | None = None
     quantity: int | None = None
-    category: str | None = None
-    image_url: str | None = None
 
+    
 
 class ProductResponse(ProductBase):
     id: int

@@ -1,6 +1,5 @@
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
-from app.schemas.auth import Message
 from app.dependencies import get_db
 from app.schemas.store import StoreResponse, CreateStore, StoreUpdate
 from app.services.store_services import create_store, update_store
