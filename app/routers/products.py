@@ -15,3 +15,11 @@ def product_create(data: ProductCreate, db: Session = Depends(get_db), current_u
   new_product = create_product(db=db,data= data, current_user=current_user)
 
   return new_product
+
+
+@product_router.get('/get-product-by-id/{product_id}')
+def get_product(product_id:int , db: Session = Depends(get_db)):
+
+  get_prod = get_product_by_id(db=db, product_id=product_id)
+
+  return get_prod

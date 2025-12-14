@@ -6,6 +6,7 @@ from app.dependencies import get_db
 from app.core.config import Settings
 from jose import jwt, JWTError
 from app.models.user import User
+from app.schemas.user import UserInfoResponse
 
 
 
@@ -41,4 +42,15 @@ def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(bearer_
             detail="User no longer exists",
         )
 
+    return user
+
+
+
+
+def user_profile(db: Session, user_id:int):
+    user = db.query(User).filter(User.id == user_id)
+
+    if not user:
+        raise HTTPException(status_code=404, detail="user not found")
+    
     return user
