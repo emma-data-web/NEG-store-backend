@@ -6,7 +6,7 @@ from datetime import datetime
 
 class Product(base):
     __tablename__ = "products"
-    #my product table
+    
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, nullable=False, index=True)
     price = Column(Numeric(10, 2), nullable=False)
@@ -23,3 +23,4 @@ class Product(base):
 
     category = relationship("Category", back_populates="products")
 
+    cart_items = relationship("CartItem", back_populates="product")

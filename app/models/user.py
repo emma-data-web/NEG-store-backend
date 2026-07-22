@@ -17,5 +17,5 @@ class User(base):
   role = Column(String, default="customer", nullable=False)
   created_at = Column(DateTime, default=datetime.utcnow)
 
-
+  cart = relationship("Cart", back_populates="user",  uselist=False)
   store = relationship("Store", back_populates="owner", uselist=False)
