@@ -6,19 +6,23 @@ from fastapi import HTTPException
 
 
 def create_store(db: Session, data: CreateStore, current_user: User):
-  new_store = Store(
-    name = data.name,
-    description = data.description,
-    phone_number = data.phone_number,
-    address = data.address,
-    owner_id= current_user.id
-  )
+    
+    if current_user.role != "customer":
+        raise HTTPException(status_code=401, detail="not authorised")
 
-  db.add(new_store)
-  db.commit()
-  db.refresh(new_store)
+    new_store = Store(
+        name = data.name,
+        description = data.description,
+        phone_number = data.phone_number,
+        address = data.address,
+        owner_id= current_user.id
+    )
 
-  return new_store
+    db.add(new_store)
+    db.commit()
+    db.refresh(new_store)
+
+    return new_store
 
 
 
@@ -29,8 +33,8 @@ def update_store(db: Session, store_id: int, data: StoreUpdate, current_user: Us
         raise HTTPException(status_code=404, detail="Store not found")
 
     
-    if store.owner_id != current_user.id:
-        raise HTTPException(status_code=403, detail="Not authorized to update this store")
+    if current_user.role != "seller":
+        raise HTTPException(status_code=401, detail="not authorised")
 
     
     if data.name is not None:
@@ -50,3 +54,19 @@ def update_store(db: Session, store_id: int, data: StoreUpdate, current_user: Us
     db.refresh(store)
 
     return store
+
+
+def delete_store(db: Session, store_id: int, current_user: User):
+    store = db.query(Store).filter(Store.id==store_id).first()
+
+    if not store:
+        raise HTTPException(status_code=404, detail="store does not exist")
+    
+    if store.owner_id != current_user.id:
+        raise HTTPException(status_code=403, detail="not authorised for this action")
+    
+    db.delete(store)
+    db.commit()
+
+    return {"message":"store deleted"}
+

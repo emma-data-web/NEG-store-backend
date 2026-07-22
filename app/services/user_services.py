@@ -47,6 +47,34 @@ def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(bearer_
 
 
 
+def get_current_admin(
+    current_user: User = Depends(get_current_user)
+):
+    if current_user.role != "admin":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Admins only"
+        )
+
+    return current_user
+
+
+
+def get_current_seller(
+    current_user: User = Depends(get_current_user)
+):
+  
+    if current_user.role != "seller":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Sellers only"
+        )
+
+    return current_user
+
+
+
+
 def user_profile(db: Session, user_id:int):
     user = db.query(User).filter(User.id == user_id)
 
@@ -54,3 +82,18 @@ def user_profile(db: Session, user_id:int):
         raise HTTPException(status_code=404, detail="user not found")
     
     return user
+
+
+def delete_user(db:Session, user_id:int, current_user: User):
+    user = db.query(User).filter(User.id == user_id).first()
+
+    if not user: 
+        raise HTTPException(status_code=404, details="user does not exist")
+    
+    if user_id!= current_user.id:
+        raise HTTPException(status_code=403, detail="not authorised to delete this account")
+    
+    db.delete(user)
+    db.commit()
+
+    return {"message": "user deleted"}

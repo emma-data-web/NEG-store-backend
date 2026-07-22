@@ -1,52 +1,44 @@
+#from sendgrid import SendGridAPIClient
+#from sendgrid.helpers.mail import Mail, To
+from fastapi_mail import FastMail, MessageSchema, MessageType
+#from app.core.config import Settings
+from app.utils.helpers import conf
 
 
-from sendgrid import SendGridAPIClient
-from sendgrid.helpers.mail import Mail, To
-from app.core.config import Settings
 
-def send_verification_email(recipient_email: str, verification_link: str):
+async def send_verification_email(recipient_email: str, verification_link: str):
 
+   try: 
+        print("1. Entered send_verification_email")
     
+        html_content = f"""
+        <html>
+            <body>
+                <h3>Account Verification Required</h3>
+                <p>Welcome to Neo stores! Please click the link below to verify your email address:</p>
+                <p style="padding: 10px; background-color: #f0f8ff; border-radius: 5px;">
+                    <a href="{verification_link}">CLICK HERE TO VERIFY YOUR ACCOUNT</a>
+                </p>
+                <p>If you did not request this, please ignore this email.</p>
+            </body>
+        </html>
+        """
+        print("2. HTML created")
+        message = MessageSchema(
+            subject="WElcome to NEG store!!!!!",
+            recipients=[recipient_email],
+            body=html_content,
+            subtype=MessageType.html,
+        )
+        print("3. Message created")
+        fm = FastMail(conf)
+        print("4. FastMail created")
+        await fm.send_message(message)
+        print("5. Email sent!")
+   except Exception as e:
+       print(repr(e))
     
-    html_content = f"""
-    <html>
-        <body>
-            <h3>Account Verification Required</h3>
-            <p>Welcome to Neo stores! Please click the link below to verify your email address:</p>
-            <p style="padding: 10px; background-color: #f0f8ff; border-radius: 5px;">
-                <a href="{verification_link}">CLICK HERE TO VERIFY YOUR ACCOUNT</a>
-            </p>
-            <p>If you did not request this, please ignore this email.</p>
-        </body>
-    </html>
-    """
-
-    message = Mail(
-        from_email=Settings.SENDER_EMAIL,
-        to_emails=To(recipient_email),
-        subject='[NEO] Account Verification',
-        html_content=html_content
-    )
-
-    try:
-        
-        sg = SendGridAPIClient(Settings.SENDGRID_API_KEY)
-        response = sg.send(message)
-        
-        
-        if 200 <= response.status_code < 300:
-            print(f"SendGrid Success: Mail submitted to {recipient_email} ---")
-            return True
-        else:
-            print(f"!!! SendGrid Error: Status {response.status_code}, Body: {response.body} !!!")
-            return False
-            
-    except Exception as e:
-        print(f"!!! SendGrid API Connection Error: {e} !!!")
-        return False
-    
-
-def send_reset_password_email(recipient_email: str, verification_link: str):
+async def send_reset_password_email(recipient_email: str, verification_link: str):
 
     
     
@@ -63,26 +55,12 @@ def send_reset_password_email(recipient_email: str, verification_link: str):
     </html>
     """
 
-    message = Mail(
-        from_email=Settings.SENDER_EMAIL,
-        to_emails=To(recipient_email),
-        subject='[NEO] PASSWORD RESET',
-        html_content=html_content
+    message = MessageSchema(
+        subject="WElcome to NEG store!!!!!",
+        recipients=[recipient_email],
+        body=html_content,
+        subtype=MessageType.html,
     )
 
-    try:
-        
-        sg = SendGridAPIClient(Settings.SENDGRID_API_KEY)
-        response = sg.send(message)
-        
-        
-        if 200 <= response.status_code < 300:
-            print(f"SendGrid Success: Mail submitted to {recipient_email} ---")
-            return True
-        else:
-            print(f"!!! SendGrid Error: Status {response.status_code}, Body: {response.body} !!!")
-            return False
-            
-    except Exception as e:
-        print(f"!!! SendGrid API Connection Error: {e} !!!")
-        return False
+    fm = FastMail(conf)
+    await fm.send_message(message)

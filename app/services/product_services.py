@@ -7,13 +7,15 @@ from fastapi import HTTPException
 
 
 def create_product(db: Session, data: ProductCreate, current_user: User):
+
+
   new_product = Product(
     name = data.name,
     price = data.price,
     description = data.description,
-    category = data.category,
+    category_id= data.category_id,
     image_url = data.image_url,
-    owner_id = current_user.id
+    store_id = current_user.store.id
      )
   
   db.add(new_product)

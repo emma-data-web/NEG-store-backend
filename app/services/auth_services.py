@@ -11,7 +11,7 @@ from app.core.config import Settings
 from fastapi import status
 
 
-def create_user(user:UserCreate, db:Session):
+async def create_user(user:UserCreate, db:Session):
     existing_user = db.query(User).filter(User.email== user.email).first()
 
     if existing_user:
@@ -33,7 +33,7 @@ def create_user(user:UserCreate, db:Session):
     db.refresh(new_user)
     
     verification_link = generate_verification_link(new_user)
-    send_verification_email(new_user.email, verification_link)
+    await send_verification_email(new_user.email, verification_link)
 
     return new_user
 
@@ -51,10 +51,12 @@ def login(user: UserLogin, db: Session):
     access_token = create_access_token({"sub": str(db_user.id)})
     return {"access_token": access_token, "token_type": "bearer"}
 
+
+
 def generate_verification_link(user: User):
     
     token = create_access_token({"sub": str(user.id)})
-    link = f"http://localhost:8000/api/v1/auth/verify-email?token={token}"
+    link = f"{Settings.EMAIL_VERIFY_URL}?token={token}"
     return link
 
 
@@ -82,7 +84,7 @@ def send_reset_link(db: Session, email: str):
     
     if not db_user:
         
-        return {"message": "If a user with that email exists, a password reset link has been sent."}
+        return {"message": "A password reset link has been sent."}
 
    
     reset_token_claims = {
@@ -92,7 +94,7 @@ def send_reset_link(db: Session, email: str):
     reset_token = reset_password_access_token(reset_token_claims)
     
     
-    reset_link = f"http://localhost:8000/api/v1/auth/reset-password?token={reset_token}"
+    reset_link = f"{Settings.EMAIL_RESET_LINK}?token={reset_token}"
     
     
     send_reset_password_email(db_user.email, reset_link)

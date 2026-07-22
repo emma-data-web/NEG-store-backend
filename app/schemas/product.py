@@ -8,7 +8,7 @@ class ProductBase(BaseModel):
     price: Decimal
     description: str | None = None
     quantity: int | None = 0
-    category: str | None = None
+    category_id: int
     image_url: str | None = None
 
 
@@ -26,7 +26,7 @@ class ProductUpdate(BaseModel):
 
 class ProductResponse(ProductBase):
     id: int
-    owner_id: int
+    store_id: int
     created_at: datetime
     updated_at: datetime | None = None
 

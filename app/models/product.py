@@ -15,9 +15,11 @@ class Product(base):
     image_url = Column(String, nullable=True)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     store_id = Column(Integer, ForeignKey("stores.id")) 
-    category = Column(String, index=True) 
+    category_id = Column(Integer, ForeignKey("categories.id")) 
     created_at = Column(DateTime, default=datetime.utcnow)
 
     
     store = relationship("Store", back_populates="products")
+
+    category = relationship("Category", back_populates="products")
 

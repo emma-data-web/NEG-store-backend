@@ -10,10 +10,10 @@ from app.services.auth_services import create_user, login, verify_user_email, se
 auth_router = APIRouter()
 
 @auth_router.post('/register', response_model=Message)
-def regiter(user: UserCreate, db: Session = Depends(get_db)):
+async def regiter(user: UserCreate, db: Session = Depends(get_db)):
   
 
-  create_user(user=user, db=db)
+  await create_user(user=user, db=db)
 
   return {"message": f"Account successfully created. A verification link has been sent to {user.email}."}
 
