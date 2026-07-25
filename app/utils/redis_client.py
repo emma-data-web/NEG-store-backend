@@ -1,10 +1,11 @@
 import redis
+from app.core.config import Settings
 
 client = redis.Redis(
 
-    host="localhost",
-    port=6379,
-    decode_responses=True
+    host=Settings.REDIS_HOST,
+    port=Settings.REDIS_PORT,
+    decode_responses=Settings.DECODE_RESPONSES
 
 )
 

@@ -19,6 +19,9 @@ class Settings(BaseSettings):
   MAIL_SSL_TLS: bool
   USE_CREDENTIALS: bool
   VALIDATE_CERTS: bool
+  REDIS_HOST : str
+  REDIS_PORT: int
+  DECODE_RESPONSES : bool
 
   class Config:
      env_file = "dev.env"
