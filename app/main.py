@@ -8,14 +8,29 @@ from app.routers.products import product_router
 from app.routers.users import user_router
 from app.routers.categories import category_router
 from app.routers.cart import cart_router
+from contextlib import asynccontextmanager
 
 
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+  for _ in range(5):
+    conn = engine.connect()
+    conn.close()
+
+  yield
+
+  engine.dispose()
+
+
+  
 
 
 
 app = FastAPI(
     title="trillmill-BACKEND",
-    version="1.0.0"
+    version="1.0.0",
+    lifespan=lifespan
 )
 
 

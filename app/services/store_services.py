@@ -3,6 +3,8 @@ from app.schemas.store import CreateStore, StoreUpdate
 from app.models.user import User
 from app.models.store import Store
 from fastapi import HTTPException
+from app.utils.redis_client import client
+import json
 
 
 def create_store(db: Session, data: CreateStore, current_user: User):
@@ -23,6 +25,39 @@ def create_store(db: Session, data: CreateStore, current_user: User):
     db.refresh(new_store)
 
     return new_store
+
+
+def get_store_by_id(db: Session, store_id: int):
+
+    cached_key = f"store_id:{store_id}"
+
+    cached_store = client.get(cached_key)
+
+    if cached_store:
+        return json.loads(cached_store)
+
+    store = db.query(Store).filter(Store.id == store_id).first()
+
+
+    if not store:
+        raise HTTPException(status_code=404, detail="store not found")
+
+    store_data = {
+    "name": store.name,
+    "description": store.description,
+    "phone_number": store.phone_number,
+    "address": store.address
+    }
+
+    client.setex(
+        cached_key,
+        300,
+        json.dump(store_data)
+    )
+
+    return store_data
+
+
 
 
 
@@ -53,6 +88,11 @@ def update_store(db: Session, store_id: int, data: StoreUpdate, current_user: Us
     db.commit()
     db.refresh(store)
 
+    cached_key = f"store_id:{store_id}"
+
+    client.delete(cached_key)
+
+
     return store
 
 
@@ -67,6 +107,10 @@ def delete_store(db: Session, store_id: int, current_user: User):
     
     db.delete(store)
     db.commit()
+
+    cached_key = f"store_id:{store_id}"
+
+    client.delete(cached_key)
 
     return {"message":"store deleted"}
 

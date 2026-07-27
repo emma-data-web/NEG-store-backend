@@ -24,6 +24,7 @@ def create_product(db: Session, data: ProductCreate, current_user: User):
   db.commit()
   db.refresh(new_product)
 
+
   return new_product
 
 
