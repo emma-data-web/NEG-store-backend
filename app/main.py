@@ -14,16 +14,10 @@ from contextlib import asynccontextmanager
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-  for _ in range(5):
-    conn = engine.connect()
-    conn.close()
+    yield
 
-  yield
+    await engine.dispose()
 
-  engine.dispose()
-
-
-  
 
 
 
@@ -52,7 +46,7 @@ app.include_router(store_router, prefix="/api/v1/store", tags=["Store"])
 app.include_router(product_router, prefix="/api/v1/product", tags=["product"])
 
 
-app.include_router(user_router, prefix="/api/v1/product", tags=["user"])
+app.include_router(user_router, prefix="/api/v1/user", tags=["user"])
 
 app.include_router(category_router,prefix="/api/v1/category", tags=["category"])
 

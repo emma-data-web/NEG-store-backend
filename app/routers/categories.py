@@ -1,24 +1,43 @@
 from fastapi import APIRouter, Depends
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from app.dependencies import get_db
 from app.models import User
 from app.schemas.category import CreateCategory
 from app.services.user_services import get_current_admin
-from app.services.category_services import create_category, delete_category
-
+from app.services.category_services import (
+    create_category,
+    delete_category,
+)
 
 category_router = APIRouter()
 
+
 @category_router.post("/create-category")
-def create_categories(category: CreateCategory, db: Session = Depends(get_db), current: User = Depends(get_current_admin)):
+async def create_categories(
+    category: CreateCategory,
+    db: AsyncSession = Depends(get_db),
+    current: User = Depends(get_current_admin),
+):
+    await create_category(
+        db=db,
+        category=category,
+        current=current,
+    )
 
-  create_category(db=db, category=category,current=current)
-
-  return {"message":"category creaated"}
+    return {"message": "Category created"}
 
 
 @category_router.delete("/delete-category/{category_id}")
-def delete_categories(category_id: int, db: Session = Depends(get_db), current: User = Depends(get_current_admin)):
-  delete_category(db=db, category_id=category_id,current=current)
+async def delete_categories(
+    category_id: int,
+    db: AsyncSession = Depends(get_db),
+    current: User = Depends(get_current_admin),
+):
+    await delete_category(
+        db=db,
+        category_id=category_id,
+        current=current,
+    )
 
-  return {"message":"deleted successfully"}
+    return {"message": "Deleted successfully"}
