@@ -1,14 +1,13 @@
-
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession 
 from app.schemas.product import ProductCreate, ProductUpdate
 from app.models.user import User
 from app.models.product import Product
 from fastapi import HTTPException
 import json
 from app.utils.redis_client import client
+from sqlalchemy import select
 
-
-def create_product(db: Session, data: ProductCreate, current_user: User):
+async def create_product(db: AsyncSession, data: ProductCreate, current_user: User):
 
 
   new_product = Product(
@@ -21,25 +20,25 @@ def create_product(db: Session, data: ProductCreate, current_user: User):
      )
   
   db.add(new_product)
-  db.commit()
-  db.refresh(new_product)
+  await db.commit()
+  await db.refresh(new_product)
 
 
   return new_product
 
 
 
-def get_product_by_id(db: Session, product_id: int):
+async def get_product_by_id(db: AsyncSession, product_id: int):
 
   cache_key = f"product:{product_id}"
 
-  cached_product = client.get(cache_key)
+  cached_product =await  client.get(cache_key)
 
   
   if cached_product:
     return json.loads(cached_product)
 
-  product = db.query(Product).filter(Product.id == product_id).first()
+  product = (await db.execute( select(Product).where(Product.id == product_id))).scalar_one_or_none()
 
   if not product:
     raise HTTPException(status_code=404, detail="Product not found")
@@ -53,7 +52,7 @@ def get_product_by_id(db: Session, product_id: int):
     "image_url": product.image_url
   }
 
-  client.setex(
+  await client.setex(
     cache_key,           
     300,                
     json.dumps(product_data)  

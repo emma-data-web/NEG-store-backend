@@ -1,7 +1,7 @@
-import redis
+from redis.asyncio import Redis
 from app.core.config import Settings
 
-client = redis.Redis(
+client = Redis(
 
     host=Settings.REDIS_HOST,
     port=Settings.REDIS_PORT,

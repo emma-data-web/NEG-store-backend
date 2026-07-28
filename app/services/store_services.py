@@ -1,13 +1,14 @@
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession  
 from app.schemas.store import CreateStore, StoreUpdate
 from app.models.user import User
 from app.models.store import Store
 from fastapi import HTTPException
 from app.utils.redis_client import client
 import json
+from sqlalchemy import select
 
 
-def create_store(db: Session, data: CreateStore, current_user: User):
+async def create_store(db: AsyncSession, data: CreateStore, current_user: User):
     
     if current_user.role != "customer":
         raise HTTPException(status_code=401, detail="not authorised")
@@ -21,22 +22,22 @@ def create_store(db: Session, data: CreateStore, current_user: User):
     )
 
     db.add(new_store)
-    db.commit()
-    db.refresh(new_store)
+    await db.commit()
+    await db.refresh(new_store)
 
     return new_store
 
 
-def get_store_by_id(db: Session, store_id: int):
+async def get_store_by_id(db: AsyncSession, store_id: int):
 
     cached_key = f"store_id:{store_id}"
 
-    cached_store = client.get(cached_key)
+    cached_store = await client.get(cached_key)
 
     if cached_store:
         return json.loads(cached_store)
 
-    store = db.query(Store).filter(Store.id == store_id).first()
+    store = (await db.execute(select(Store).where(Store.id == store_id))).scalar_one_or_none()
 
 
     if not store:
@@ -49,10 +50,10 @@ def get_store_by_id(db: Session, store_id: int):
     "address": store.address
     }
 
-    client.setex(
+    await client.setex(
         cached_key,
         300,
-        json.dump(store_data)
+        json.dumps(store_data)
     )
 
     return store_data
@@ -61,9 +62,9 @@ def get_store_by_id(db: Session, store_id: int):
 
 
 
-def update_store(db: Session, store_id: int, data: StoreUpdate, current_user: User):
+async def update_store(db: AsyncSession, store_id: int, data: StoreUpdate, current_user: User):
     
-    store = db.query(Store).filter(Store.id == store_id).first()
+    store = (await db.execute(select(Store).where(Store.id == store_id))).scalar_one_or_none()
     if not store:
         raise HTTPException(status_code=404, detail="Store not found")
 
@@ -85,19 +86,19 @@ def update_store(db: Session, store_id: int, data: StoreUpdate, current_user: Us
         store.address = data.address
 
     
-    db.commit()
-    db.refresh(store)
+    await db.commit()
+    await db.refresh(store)
 
     cached_key = f"store_id:{store_id}"
 
-    client.delete(cached_key)
+    await client.delete(cached_key)
 
 
     return store
 
 
-def delete_store(db: Session, store_id: int, current_user: User):
-    store = db.query(Store).filter(Store.id==store_id).first()
+async def delete_store(db: AsyncSession, store_id: int, current_user: User):
+    store =( await db.execute(select(Store).where(Store.id==store_id))).scalar_one_or_none()
 
     if not store:
         raise HTTPException(status_code=404, detail="store does not exist")
@@ -105,12 +106,12 @@ def delete_store(db: Session, store_id: int, current_user: User):
     if store.owner_id != current_user.id:
         raise HTTPException(status_code=403, detail="not authorised for this action")
     
-    db.delete(store)
-    db.commit()
+    await db.delete(store)
+    await db.commit()
 
     cached_key = f"store_id:{store_id}"
 
-    client.delete(cached_key)
+    await client.delete(cached_key)
 
     return {"message":"store deleted"}
 

@@ -1,6 +1,6 @@
 from app.core.security import hash_password,verify_password, create_access_token, decode_access_token
 from app.schemas.auth import UserCreate, UserLogin, ResetPassword
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi import HTTPException
 from app.models.user import User
 from app.core.email import send_verification_email
@@ -9,10 +9,16 @@ from app.core.email import send_reset_password_email
 from jose import jwt, JWTError
 from app.core.config import Settings
 from fastapi import status
+from sqlalchemy import select
 
 
-async def create_user(user:UserCreate, db:Session):
-    existing_user = db.query(User).filter(User.email== user.email).first()
+async def create_user(user:UserCreate, db:AsyncSession):
+
+    stat = select(User).where(User.email == user.email)
+
+    result = await db.execute(stat)
+
+    existing_user = result.scalar_one_or_none()
 
     if existing_user:
         raise HTTPException(status_code=400, detail='User already exist')
@@ -29,8 +35,8 @@ async def create_user(user:UserCreate, db:Session):
     )
 
     db.add(new_user)
-    db.commit()
-    db.refresh(new_user)
+    await db.commit()
+    await db.refresh(new_user)
     
     verification_link = generate_verification_link(new_user)
     await send_verification_email(new_user.email, verification_link)
@@ -39,8 +45,13 @@ async def create_user(user:UserCreate, db:Session):
 
 
 
-def login(user: UserLogin, db: Session):
-    db_user = db.query(User).filter(User.email == user.email).first()
+async def login(user: UserLogin, db: AsyncSession):
+    stat = select(User).where(User.email == user.email)
+
+    result = await db.execute(stat)
+
+    db_user = result.scalar_one_or_none()
+
     if not db_user or not verify_password(user.password, db_user.hashed_password):
         raise HTTPException(status_code=401, detail='invalid username or password')
     if not db_user.is_verified:
@@ -60,27 +71,33 @@ def generate_verification_link(user: User):
     return link
 
 
-def verify_user_email(token: str, db: Session):
+async def verify_user_email(token: str, db: AsyncSession):
     payload = decode_access_token(token)
     user_id = int(payload.get("sub"))
 
-    user = db.query(User).filter(User.id == user_id).first()
+    stat = select(User).where(User.id == user_id)
+    result = await db.execute(stat)
+
+    user = result.scalar_one_or_none()
+
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
 
     user.is_verified = True
-    db.commit()
+    await db.commit()
 
     return user
 
     
-def get_user_by_email(db: Session, email: str) -> User | None:
-    return db.query(User).filter(User.email == email).first()
+async def get_user_by_email(db: AsyncSession, email: str) -> User | None:
+    stat = select(User).where(User.email == email)
 
+    result = await db.execute(stat)
+    return result.scalar_one_or_none()
 
-def send_reset_link(db: Session, email: str):
+async def send_reset_link(db: AsyncSession, email: str):
     
-    db_user = get_user_by_email(db, email)
+    db_user = await get_user_by_email(db, email)
     
     if not db_user:
         
@@ -97,12 +114,12 @@ def send_reset_link(db: Session, email: str):
     reset_link = f"{Settings.EMAIL_RESET_LINK}?token={reset_token}"
     
     
-    send_reset_password_email(db_user.email, reset_link)
+    await send_reset_password_email(db_user.email, reset_link)
     
     return {"message": "If a user with that email exists, a password reset link has been sent."}
 
 
-def reset_user_password(db: Session, data: ResetPassword):
+async def reset_user_password(db: AsyncSession, data: ResetPassword):
     try:
         
         payload = jwt.decode(data.token, Settings.SECRET_KEY, algorithms=[Settings.JWT_ALGORITHM])
@@ -119,7 +136,11 @@ def reset_user_password(db: Session, data: ResetPassword):
             detail="Invalid or expired password reset token."
         )
 
-    db_user = db.query(User).filter(User.id == int(user_id)).first()
+    stat = select(User).where(User.id == int(user_id))
+
+    result = await db.execute(stat)
+
+    db_user = result.scalar_one_or_none()
     
     if not db_user:
         raise HTTPException(
@@ -129,6 +150,6 @@ def reset_user_password(db: Session, data: ResetPassword):
 
     
     db_user.hashed_password = hash_password(data.new_password)
-    db.commit()
+    await db.commit()
     
     return {"message": "Password successfully reset. You can now log in with your new password."}
