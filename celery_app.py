@@ -8,4 +8,6 @@ celery = Celery(
 
 
 
-celery.autodiscover_tasks(["app.tasks"])
+celery.conf.imports = (
+    "app.tasks.email_tasks"
+)

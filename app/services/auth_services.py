@@ -3,7 +3,7 @@ from app.schemas.auth import UserCreate, UserLogin, ResetPassword
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi import HTTPException
 from app.models.user import User
-from app.core.email import send_verification_email
+from app.tasks.email_tasks import send_verification_email_task
 from app.core.security import reset_password_access_token
 from app.core.email import send_reset_password_email
 from jose import jwt, JWTError
@@ -39,7 +39,7 @@ async def create_user(user:UserCreate, db:AsyncSession):
     await db.refresh(new_user)
     
     verification_link = generate_verification_link(new_user)
-    await send_verification_email(new_user.email, verification_link)
+    send_verification_email_task.delay(new_user.email, verification_link)
 
     return new_user
 
