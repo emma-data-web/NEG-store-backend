@@ -5,7 +5,7 @@ from fastapi import HTTPException
 from app.models.user import User
 from app.tasks.email_tasks import send_verification_email_task
 from app.core.security import reset_password_access_token
-from app.core.email import send_reset_password_email
+from app.tasks.email_tasks import send_reset_password_email_task
 from jose import jwt, JWTError
 from app.core.config import Settings
 from fastapi import status
@@ -114,7 +114,7 @@ async def send_reset_link(db: AsyncSession, email: str):
     reset_link = f"{Settings.EMAIL_RESET_LINK}?token={reset_token}"
     
     
-    await send_reset_password_email(db_user.email, reset_link)
+    send_reset_password_email_task.delay(db_user.email, reset_link)
     
     return {"message": "If a user with that email exists, a password reset link has been sent."}
 
