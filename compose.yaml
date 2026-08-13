@@ -1,7 +1,18 @@
 services:
+
   api:
     build: .
     env_file:
-      - .env
+      - dev.env
     ports:
       - "8000:8000"
+
+    
+
+  worker:
+    build: .
+    command: celery -A celery_app worker --loglevel=info
+    
+
+  redis:
+    image: redis:alpine

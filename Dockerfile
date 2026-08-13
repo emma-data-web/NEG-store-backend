@@ -10,7 +10,7 @@ ENV PYTHONUNBUFFERED=1
 WORKDIR /app
 
 
-RUN pip install --no-cache-dir poetry==2.4.1
+RUN pip install --no-cache-dir poetry==2.4.1 --timeout 120
 
 
 RUN poetry config virtualenvs.create false
