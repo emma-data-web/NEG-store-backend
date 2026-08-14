@@ -1,4 +1,4 @@
-# Neon Grace
+# Neon Grace backend
 
 A backend API built with FastAPI, SQLAlchemy, PostgreSQL/SQLite, Redis, Docker and Celery.
 
